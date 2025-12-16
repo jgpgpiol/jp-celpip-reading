@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>JP – CELPIP Practice</title>
+<style>
+:root{
+ --bg:#020617;--panel:#0f172a;
+ --accent:#38bdf8;--good:#22c55e;--bad:#ef4444;
+ --text:#e5e7eb;--muted:#94a3b8
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:radial-gradient(circle at top left,#0ea5e9,#020617 60%);color:var(--text);min-height:100vh;display:flex;justify-content:center;align-items:center}
+.app{width:96%;max-width:1500px;background:#020617;border-radius:16px;box-shadow:0 0 40px rgba(56,189,248,.25);display:grid;grid-template-columns:280px 1fr;overflow:hidden}
+.sidebar{padding:24px;border-right:1px solid #1f2933}
+.logo{font-size:2rem;font-weight:900;letter-spacing:3px;color:var(--accent)}
+.logo-sub{font-size:.85rem;color:var(--muted);margin-bottom:20px}
+.nav-item{padding:12px;border-radius:10px;background:var(--panel);border:1px solid #1f2933;font-weight:600}
+.main{padding:28px}
+.header h1{margin:0;font-size:1.6rem}
+.header p{margin:6px 0;color:var(--muted)}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.timer{font-weight:800;color:var(--accent)}
+.content{display:grid;grid-template-columns:1.5fr 1fr;gap:24px}
+.panel{background:var(--panel);border-radius:14px;border:1px solid #1f2933;padding:22px}
+.panel h3{margin-top:0;color:var(--accent)}
+#passage{line-height:1.85;font-size:1.05rem}
+.question{margin-bottom:16px}
+.question label{font-size:.9rem;color:var(--muted)}
+input{width:100%;padding:10px;border-radius:8px;background:#020617;border:1px solid #1f2933;color:var(--text)}
+.correct{border-color:var(--good)}
+.wrong{border-color:var(--bad)}
+.feedback{font-size:.85rem;margin-top:4px}
+button{background:linear-gradient(90deg,#38bdf8,#0ea5e9);border:none;border-radius:8px;padding:10px 18px;font-weight:700;cursor:pointer;color:#020617}
+.actions{display:flex;gap:12px;margin-top:8px}
+.score{margin-top:12px;color:var(--muted)}
+.blink{margin-top:6px;color:var(--good);font-weight:800;animation:blink 1s infinite}
+@keyframes blink{0%,50%,100%{opacity:1}25%,75%{opacity:.2}}
+@media(max-width:900px){.app{grid-template-columns:1fr}.content{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="logo">JP</div>
+  <div class="logo-sub">Jerwin Piol<br>CELPIP Practice</div>
+  <div class="nav-item">Reading – Exam Mode</div>
+</aside>
+<main class="main">
+  <div class="header">
+    <div class="topbar">
+      <div>
+        <h1>Reading Section</h1>
+<p><strong>Instructions:</strong> Read each passage carefully. You will have a limited amount of time to answer the questions that follow. Select or type the best answer based on the information provided in the passage. Once time is finished, the system will automatically submit your answers and move to the next passage.</p>
+      </div>
+      <div class="timer" id="timer">03:00</div>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="panel">
+      <h3 id="readingTitle">Reading Passage 1 / 12</h3>
+      <p id="passage"></p>
+    </div>
+
+    <div class="panel">
+      <h3>Questions</h3>
+      <div id="questions"></div>
+      <div class="actions">
+        <button onclick="submitPassage()">Submit Passage</button>
+      </div>
+      <div class="score">
+        <div id="readingScore"></div>
+        <div id="bandScore"></div>
+        <div id="passMessage" class="blink"></div>
+      </div>
+      <hr style="border-color:#1f2933;margin:16px 0">
+      <h3>Progress History</h3>
+      <ul id="history" style="padding-left:18px;font-size:.9rem"></ul>
+    </div>
+  </div>
+</main>
+</div>
+
+<script>
+const passages = [
+{
+ text:`Last Monday morning, John arrived at his company’s downtown office nearly forty minutes earlier than usual. He had been asked to present a detailed quarterly performance report to senior management, and he wanted enough time to review his notes and confirm that all data was accurate. Before the meeting began, John tested the projector, checked the internet connection, and arranged printed handouts on the conference table. Several colleagues arrived shortly afterward and appreciated that everything was ready in advance. Because of John’s preparation, the presentation proceeded smoothly, questions were answered clearly, and the meeting ended ahead of schedule.`,
+ qa:[
+  {q:'Why did John arrive early at the office?',a:'to review his notes'},
+  {q:'What task was John preparing for?',a:'quarterly performance report'},
+  {q:'Where did the meeting take place?',a:'downtown office'},
+  {q:'What was the result of John’s preparation?',a:'meeting ended ahead of schedule'}
+ ]
+},
+{
+ text:`Over the weekend, Sarah volunteered at a local animal shelter located near the city center. Due to a seasonal increase in abandoned animals, the shelter was experiencing staff shortages and needed additional help. Sarah assisted with feeding the animals, cleaning cages, and guiding visitors who were interested in adoption. She also helped update records and answer basic questions from the public. By the end of the day, the shelter staff noted that operations ran more efficiently because of her assistance.`,
+ qa:[
+  {q:'Why did the shelter need extra help?',a:'staff shortages'},
+  {q:'What tasks did Sarah help with?',a:'feeding the animals'},
+  {q:'Where was the animal shelter located?',a:'city center'},
+  {q:'What was the outcome of Sarah’s help?',a:'operations ran more efficiently'}
+ ]
+},
+{
+ text:`Earlier this month, Michael attended a mandatory workplace safety training session organized by his employer. The training focused on updated emergency procedures, correct equipment handling, and reporting protocols. All employees were required to attend in order to remain compliant with company regulations. During the session, Michael participated in group discussions and practical demonstrations. After completing the training, he felt more confident in his ability to respond appropriately during emergency situations.`,
+ qa:[
+  {q:'Why was Michael required to attend the training?',a:'company regulations'},
+  {q:'What topics were covered during the session?',a:'emergency procedures'},
+  {q:'How did Michael participate in the training?',a:'group discussions'},
+  {q:'How did Michael feel after completing the training?',a:'more confident'}
+ ]
+},
+{
+ text:`Last Friday evening, Anna organized a community meeting at the local library to discuss ongoing neighborhood concerns. Residents gathered to talk about parking shortages, increased noise levels, and proposed improvements to public spaces. Anna ensured that everyone had an opportunity to share their opinions and recorded key points during the discussion. At the end of the meeting, participants agreed that the feedback collected would help guide future planning decisions.`,
+ qa:[
+  {q:'Where was the community meeting held?',a:'local library'},
+  {q:'What issues were discussed during the meeting?',a:'parking shortages'},
+  {q:'What role did Anna play during the meeting?',a:'organized the meeting'},
+  {q:'Why was the feedback considered useful?',a:'guide future planning'}
+ ]
+},
+{
+ text:`Earlier this year, Emma attended a professional networking event hosted at a downtown hotel. The event brought together professionals from various industries to exchange ideas and build new connections. Emma spoke with several representatives, exchanged contact information, and later followed up through email. She believed that maintaining these connections could help her explore future career opportunities and expand her professional network.`,
+ qa:[
+  {q:'Where was the networking event held?',a:'downtown hotel'},
+  {q:'What was the main purpose of the event?',a:'build new connections'},
+  {q:'What did Emma do after the event?',a:'followed up through email'},
+  {q:'Why did Emma find the event valuable?',a:'career opportunities'}
+ ]
+},
+{
+ text:`During the morning rush hour, Lisa experienced significant delays on public transportation due to unexpected road construction. Realizing that she would arrive late to work, she immediately informed her supervisor about the situation. Later that day, Lisa reviewed alternative routes and decided to leave home earlier in the future to avoid similar delays. This adjustment helped her manage her schedule more effectively.`,
+ qa:[
+  {q:'Why was Lisa delayed during her commute?',a:'road construction'},
+  {q:'What action did Lisa take after noticing the delay?',a:'informed her supervisor'},
+  {q:'When did the delay occur?',a:'morning rush hour'},
+  {q:'What decision did Lisa make for the future?',a:'leave home earlier'}
+ ]
+},
+{
+ text:`Last summer, Mark worked part-time at a local café while attending university full-time. Balancing academic responsibilities and work commitments was challenging, especially during exam periods. However, Mark learned how to manage his time more effectively and improved his customer service skills by interacting with customers daily. He believes that this experience will benefit him in future professional roles.`,
+ qa:[
+  {q:'Where did Mark work during the summer?',a:'local café'},
+  {q:'What challenge did Mark face?',a:'balancing academic responsibilities'},
+  {q:'What skill did Mark improve?',a:'customer service'},
+  {q:'Why does Mark value this experience?',a:'benefit him in future'}
+ ]
+},
+{
+ text:`Late last night, Paul noticed a water leak in the kitchen of his apartment. Concerned about potential damage, he immediately submitted a maintenance request to the building management. The management team responded promptly and scheduled a repair for the following morning. Paul felt relieved knowing that the issue would be resolved quickly.`,
+ qa:[
+  {q:'What problem did Paul notice?',a:'water leak'},
+  {q:'What action did Paul take?',a:'submitted a maintenance request'},
+  {q:'Where did the issue occur?',a:'apartment kitchen'},
+  {q:'How did Paul feel after the response?',a:'relieved'}
+ ]
+},
+{
+ text:`Before taking her driving test, Nina practiced regularly at a nearby training center. She carefully reviewed traffic rules, completed several mock exams, and received feedback from an instructor. As a result of her consistent preparation, Nina felt calm and confident on the day of the test.`,
+ qa:[
+  {q:'Where did Nina practice driving?',a:'training center'},
+  {q:'What materials did Nina review?',a:'traffic rules'},
+  {q:'Who provided feedback to Nina?',a:'instructor'},
+  {q:'How did Nina feel on test day?',a:'confident'}
+ ]
+},
+{
+ text:`On Thursday morning, Kevin attended a client meeting at a coworking space located downtown. The discussion focused on project timelines, budget adjustments, and expected deliverables. Both parties shared their concerns and clarified expectations. By the end of the meeting, they agreed on the next steps and established a revised schedule.`,
+ qa:[
+  {q:'Where did the client meeting take place?',a:'coworking space'},
+  {q:'What topics were discussed?',a:'project timelines'},
+  {q:'What did both parties do during the meeting?',a:'clarified expectations'},
+  {q:'What was the outcome of the meeting?',a:'agreed on the next steps'}
+ ]
+},
+{
+ text:`Last month, Maria contacted customer service after noticing an incorrect charge on her utility bill. She provided the necessary account information and explained the issue clearly. After reviewing her records, the company acknowledged the mistake and corrected the charge. Maria appreciated the quick and professional resolution.`,
+ qa:[
+  {q:'Why did Maria contact customer service?',a:'incorrect charge'},
+  {q:'What information did Maria provide?',a:'account information'},
+  {q:'How did the company respond?',a:'corrected the charge'},
+  {q:'How did Maria feel about the resolution?',a:'appreciated'}
+ ]
+},
+{
+ text:`Earlier this week, Daniel joined an online workshop designed to improve professional communication skills. The workshop included interactive discussions, written exercises, and practical examples. Daniel actively participated and took notes throughout the session. He plans to apply the strategies he learned in his workplace communication.`,
+ qa:[
+  {q:'What type of workshop did Daniel attend?',a:'online workshop'},
+  {q:'What skills did the workshop focus on?',a:'communication skills'},
+  {q:'How did Daniel participate?',a:'actively participated'},
+  {q:'Where does Daniel plan to apply what he learned?',a:'workplace'}
+ ]
+}
+];
+
+let index=0;
+let historyData=[];
+let passageTime=180;
+let timerInterval;
+
+function shuffle(a){return a.sort(()=>Math.random()-0.5)}
+
+function startTimer(){
+ clearInterval(timerInterval);
+ let t=passageTime;
+ updateTimer(t);
+ timerInterval=setInterval(()=>{
+  t--; updateTimer(t);
+  if(t<=0){ clearInterval(timerInterval); submitPassage(); }
+ },1000);
+}
+
+function updateTimer(t){const m=Math.floor(t/60),s=t%60;document.getElementById('timer').textContent=`${m}:${s.toString().padStart(2,'0')}`}
+
+function loadPassage(){
+ document.getElementById('readingTitle').textContent=`Reading Passage ${index+1} / ${passages.length}`;
+ document.getElementById('passage').textContent=passages[index].text;
+ document.getElementById('readingScore').textContent='';
+ document.getElementById('bandScore').textContent='';
+ document.getElementById('passMessage').textContent='';
+ const qBox=document.getElementById('questions');
+ qBox.innerHTML='';
+ shuffle([...passages[index].qa]).forEach((it,i)=>{
+  qBox.innerHTML+=`<div class='question'><label>${i+1}. ${it.q}</label><input data-ans='${it.a}'><div class='feedback'></div></div>`;
+ });
+ startTimer();
+}
+
+function updateHistory(){
+ const ul=document.getElementById('history');
+ ul.innerHTML='';
+ historyData.forEach(h=>{
+  const li=document.createElement('li');
+  li.textContent=`Passage ${h.passage}: Score ${h.score}/4 | Band ${h.band}`;
+  ul.appendChild(li);
+ });
+}
+
+function submitPassage(){
+ clearInterval(timerInterval);
+ let score=0;
+ document.querySelectorAll('[data-ans]').forEach(inp=>{
+  const ans=inp.dataset.ans,fb=inp.nextElementSibling;
+  if(inp.value.toLowerCase().includes(ans)){
+    inp.className='correct'; fb.textContent=`✔ Correct (Answer: ${ans})`; fb.style.color='var(--good)'; score++;
+  } else {
+    inp.className='wrong'; fb.textContent=`✖ Incorrect (Correct answer: ${ans})`; fb.style.color='var(--bad)';
+  }
+ });
+ const band=score===4?10:score===3?9:score===2?7:score===1?5:4;
+ document.getElementById('readingScore').textContent=`Passage Score: ${score} / 4`;
+ document.getElementById('bandScore').textContent=`Estimated Band Score: ${band}`;
+ document.getElementById('passMessage').textContent=score>=3?'🎉 Congratulations! You passed this passage.':'';
+ historyData.push({passage:index+1,score,band});
+ updateHistory();
+ setTimeout(()=>{ if(index<passages.length-1){ index++; loadPassage(); } },1500);
+}
+
+loadPassage();
+</script>
+</body>
+</html>
